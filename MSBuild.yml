@@ -1,0 +1,32 @@
+# Note - this uses MSBuild rather than dotnet
+# It's designed for projects of the older csproj format.
+name: CI
+env:
+  sln_name: solution.sln # replace with your .sln
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Nuget.exe
+      uses: warrenbuckley/Setup-Nuget@v1
+    - name: Restore packages
+      run: nuget restore ${{ env.sln_name }}
+    - name: Setup MSBuild.exe
+      uses: warrenbuckley/Setup-MSBuild@v1
+    - name: Build with MSBuild
+      run: msbuild ${{ env.sln_name }} -p:Configuration=Release
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        # Artifact name
+        name: Output
+        # Directory containing files to upload
+        path: /bin/Release/
